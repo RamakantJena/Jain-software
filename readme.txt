@@ -7,4 +7,4 @@ Required libraries to run the script:
 The script will run better if the script runs in a virtual environment.
 # pip install virtualenvwrapper-win
 
-I didn't find any APIs to get bulk WHOIS information, so I did manually
+I didn't find any APIs to get bulk WHOIS information, so I did it manually.
