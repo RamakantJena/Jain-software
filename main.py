@@ -19,57 +19,78 @@ def data_collection():
     """
 
     # Enter any domain name here
-    domain = 'amazon.com'
-    response = None
-    try:
-        response = whois.whois(domain)
-    except PywhoisError:
-        print(PywhoisError)
-        print(f"No match for: {domain}")
-        return
+    domain = None
 
-    print("Name: ", response.name)
-    name = response.name
-    print("Domain name: ", response.domain)
-    domain_name = response.domain
-    print("Email: ", response.emails[1])
-    mail_id = response.emails[1]
-    createion_date = None
+    while True:
 
-    try:
-        for i in response.creation_date:
-            print("Createion date: ", response.creation_date[0])
-            createion_date = response.creation_date[0]
-            break
-    except Exception as e:
-        print("Creation date: ", response.creation_date)
-        createion_date = response.creation_date
+        print("Enter 'E' to stop entering domain. ")
+        domain = str(input("Enter the domain name:> "))
+
+        if domain == 'E' or not domain.__contains__("."):
+            print("Successfully exit.")
+            return
+
+        response = None
+        try:
+            response = whois.whois(domain)
+        except Exception as e:
+            print(e)
+            print(f"No match for: {domain}")
+            return
+
+        name = None
+        domain_name = None
+        mail_id = None
+        createion_date = None
+        try:
+            print("Name: ", response.name)
+            name = response.name
+            if type(response.domain_name) == type([]):
+                print("Domain name: ", response.domain_name[1])
+                domain_name = response.domain_name[1]
+            else:
+                print("Domain name: ", response.domain_name)
+                domain_name = response.domain_name
+
+            print("Email: ", response.emails[1])
+            mail_id = response.emails[1]
+
+            for i in response.creation_date:
+                print("Createion date: ", response.creation_date[0])
+                createion_date = response.creation_date[0]
+                break
+        except Exception as e:
+            print("Creation date: ", response.creation_date)
+            createion_date = response.creation_date
+
+        # print(response)
+
+        if domain_name != None:
+            data = {
+                'Name': [name],
+                'Domain_name': [domain_name],
+                'Email': [mail_id],
+                'Creation_date': [createion_date]
+            }
+
+            # Get the data from CSV file
+            csv_data = pd.read_csv("Whoisdata.csv")
+
+            # Check if data already existing or not. It prevents from data duplication.
+            if not csv_data['Domain_name'].tolist().__contains__(domain_name):
+
+                # Make data frame of above data
+                df = pd.DataFrame(data)
+                # append data frame to CSV file
+                df.to_csv("Whoisdata.csv", mode="a", index=False, header=False)
+
+                print("Data appended successfully.")
+            else:
+                print("Data already exist in the file.")
+        else:
+            print(domain + " is not a valid input \nEnter valid domain.")
 
 
-    # print(response)
-
-    data = {
-        'Name': [name],
-        'Domain_name': [domain_name],
-        'Email': [mail_id],
-        'Creation_date': [createion_date]
-    }
-
-    # Get the data from CSV file
-    csv_data = pd.read_csv("Whoisdata.csv")
-
-    # Check if data already existing or not. It prevents from data duplication.
-    if not csv_data['Domain_name'].tolist().__contains__(domain_name):
-
-        # Make data frame of above data
-        df = pd.DataFrame(data)
-        # append data frame to CSV file
-        df.to_csv("Whoisdata.csv", mode="a", index=False, header=False)
-
-        print("Data appended successfully.")
-
-    else:
-        print("Data already exist in the file.")
 
 # This method used to send mail to specified email.
 def sendemail():
